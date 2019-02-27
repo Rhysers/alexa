@@ -5,16 +5,29 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 from apiclient.http import MediaIoBaseDownload
 
+#values for any error handling:
+headers = {'Content-type': 'application/json',}
+
 # Set Base Directory for easy changing for migration to rPi
-baseDirectory = '/mnt/raid/alexa/'
+# Get the Base Directory from file
+try:
+    f=open("baseDirectory.txt", "r")
+    if f.mode == 'r':
+        baseDirectory=f.read()
+        f.close()
+except:
+    f.close()
+    data = '{"text":"<!channel> Alexa Automation failed to get the working directory"}'
+    response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    quit()
+if debugging:
+    print("Current Number="+str(currentNumber))
+    print("Next Number="+str(nextNumber))
+
 # Change directory here
 os.chdir(baseDirectory)
 
 debugging=True
-
-#values for any error handling:
-headers = {'Content-type': 'application/json',}
-
 
 # Get Current Number
 try:
