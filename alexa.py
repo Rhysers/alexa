@@ -5,29 +5,29 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 from apiclient.http import MediaIoBaseDownload
 
+debugging=True
+
 #values for any error handling:
 headers = {'Content-type': 'application/json',}
 
 # Set Base Directory for easy changing for migration to rPi
 # Get the Base Directory from file
 try:
-    f=open("baseDirectory.txt", "r")
+    f=open("/alexaBaseDirectory.txt", "r")
     if f.mode == 'r':
-        baseDirectory=f.read()
+        baseDirectory=f.read().strip()
+#        baseDirectory=baseDirectory.strip()
         f.close()
+        if debugging:
+            print("Base Directory is "+baseDirectory)
 except:
     f.close()
     data = '{"text":"<!channel> Alexa Automation failed to get the working directory"}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     quit()
-if debugging:
-    print("Current Number="+str(currentNumber))
-    print("Next Number="+str(nextNumber))
 
 # Change directory here
 os.chdir(baseDirectory)
-
-debugging=True
 
 # Get Current Number
 try:
@@ -150,11 +150,16 @@ try:
     lines = f.readlines()
     f.close()
     date=datetime.datetime.today()
+    if fileTitle:
+        tempMatch = fileTitle.group(1)
+        fileTitle = str(tempMatch)
+    else:
+        fileTitle = "Samson House Devotional"
     for i in range(len(lines)):
         if lines[i].startswith('    <enclosure url'):
             lines[i] = "    <enclosure url=\"https://odinforce.net/"+newFileName+"\" length=\""+str(fileSize)+"\" type=\"audio/mpeg\" />\n"
         elif lines[i].startswith('    <title>'):
-            lines[i] = "    <title>"+str(fileTitle[1])+"</title>\n"
+            lines[i] = "    <title>"+fileTitle+"</title>\n"
         elif lines[i].startswith('    <itunes:title>'):
             lines[i] = "    <itunes:title>"+date.strftime('%m-%d-%Y')+"</itunes:title>\n"
         elif lines[i].startswith('    <pubDate>'):
@@ -164,7 +169,7 @@ try:
     f.close()
 except:
     f.close()
-    data = '{"text":"<!channel> Alexa Automation failed while reading from the RSS XML."}' % (nextNumber)
+    data = '{"text":"<!channel> Alexa Automation failed while reading from the RSS XML."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     quit()
 
