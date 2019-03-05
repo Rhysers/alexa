@@ -5,7 +5,7 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 from apiclient.http import MediaIoBaseDownload
 
-debugging=False
+debugging=True
 
 #values for any error handling:
 headers = {'Content-type': 'application/json',}
@@ -77,7 +77,11 @@ try:
                 print("List of files returned by Google:")
                 print(fileName)
             if fileName.startswith( str(nextNumber)):
+                fileNameHold = fileName
                 file_ID = file.get('id')
+                if debugging:
+                    print(fileName+" matched "+str(nextNumber))
+                    print(file_ID)
                 #break
             if fileName.startswith( str(nextNumber+1)):
                 readAhead = True
@@ -88,6 +92,8 @@ except:
     data = '{"text":"<!channel> Alexa Automation failed to locate file number %i in Google Drive."}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     quit()
+#reset filename to correct one held from loop
+fileName = fileNameHold
 
 if not(readAhead):
     data = '{"text":"Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after (%i) that is missing."}' % (nextNumber+1)
