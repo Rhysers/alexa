@@ -65,6 +65,7 @@ except:
 # Get All the files
 try:
     page_token= None
+    readAhead = False
     while True:
         results = service.files().list(
             q="name contains '.m4a'", spaces='drive',
@@ -77,7 +78,9 @@ try:
                 print(fileName)
             if fileName.startswith( str(nextNumber)):
                 file_ID = file.get('id')
-                break
+                #break
+            if fileName.startswith( str(nextNumber+1)):
+                readAhead = True
         page_token = results.get('nextPageToken', None)
         if page_token is None:
             break
@@ -85,6 +88,10 @@ except:
     data = '{"text":"<!channel> Alexa Automation failed to locate file number %i in Google Drive."}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     quit()
+
+if not(readAhead):
+    data = '{"text":"Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after (%i) that is missing."}' % (nextNumber+1)
+    response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
 
 # Download the file
 try:
