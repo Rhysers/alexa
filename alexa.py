@@ -96,7 +96,7 @@ except:
 fileName = fileNameHold
 
 if not(readAhead):
-    data = '{"text":"Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after (%i) that is missing."}' % (nextNumber+1)
+    data = '{"text":"Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing."}' % (nextNumber+1)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
 
 # Download the file
