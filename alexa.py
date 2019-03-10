@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, re, sys, datetime, io, subprocess, requests, glob, time
+import os, re, sys, datetime, io, subprocess, requests, glob, time, smtplib
 from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
@@ -9,6 +9,38 @@ debugging=True
 
 #values for any error handling:
 headers = {'Content-type': 'application/json',}
+
+#Define Email Function:
+def sendMail(subject, body)
+    try:
+        server=smtplib.SMTP('smtp.gmail.com', 587)
+        server.ehlo()
+        server.starttls()
+    except:
+        print('Failed to instantiate the mail server.')
+    try:
+        sent_from = 'piratemonkscal@gmail.com'
+        to = ['rhys.j.ferris@gmail.com', 'tmoucka@gmail.com', 'treyshaver@gmail.com']
+#        subject = sys.argv[2]
+#        body = sys.argv[3]
+
+        email_text = """\
+        From: %s
+        To: %s
+        Subject: %s
+
+        %s
+        """ % (sent_from, ", ".join( to ), subject, body)
+    except:
+        print('Issues building the message.')
+    try:
+        gmail_user = 'piratemonkscal@gmail.com'
+        gmail_password = 'SamsonSociety2019'
+        server.login(gmail_user, gmail_password)
+        server.sendmail(sent_from, to, email_text)
+        server.close()
+    except:
+        print('Failed to send the message.')
 
 # Set Base Directory for easy changing for migration to rPi
 # Get the Base Directory from file
