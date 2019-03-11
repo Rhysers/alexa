@@ -4,6 +4,11 @@ from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 from apiclient.http import MediaIoBaseDownload
+#mime stuff
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 debugging=True
 
@@ -11,7 +16,7 @@ debugging=True
 headers = {'Content-type': 'application/json',}
 
 #Define Email Function:
-def sendMail(subject, body)
+def sendMail(subject, body):
     try:
         server=smtplib.SMTP('smtp.gmail.com', 587)
         server.ehlo()
@@ -20,35 +25,35 @@ def sendMail(subject, body)
         print('Failed to instantiate the mail server.')
     try:
         sent_from = 'piratemonkscal@gmail.com'
-        to = ['rhys.j.ferris@gmail.com', 'tmoucka@gmail.com', 'treyshaver@gmail.com']
+        to = ['rhys.j.ferris@gmail.com', 'mooreknowledge@gmail.com']
 #        subject = sys.argv[2]
 #        body = sys.argv[3]
 
-        email_text = """\
-        From: %s
-        To: %s
-        Subject: %s
-
-        %s
-        """ % (sent_from, ", ".join( to ), subject, body)
+        msg = MIMEMultipart()
+        msg['From'] = 'piratemonkscal@gmail.com'
+        msg['To'] = ", ".join(to)
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+        text = msg.as_string()
     except:
         print('Issues building the message.')
     try:
         gmail_user = 'piratemonkscal@gmail.com'
         gmail_password = 'SamsonSociety2019'
         server.login(gmail_user, gmail_password)
-        server.sendmail(sent_from, to, email_text)
+        server.sendmail(sent_from, ", ".join(to), text)
         server.close()
+        print ("Message sent")
     except:
         print('Failed to send the message.')
 
 # Set Base Directory for easy changing for migration to rPi
 # Get the Base Directory from file
+
 try:
     f=open("/alexaBaseDirectory.txt", "r")
     if f.mode == 'r':
         baseDirectory=f.read().strip()
-#        baseDirectory=baseDirectory.strip()
         f.close()
         if debugging:
             print("Base Directory is "+baseDirectory)
@@ -123,18 +128,19 @@ try:
         page_token = results.get('nextPageToken', None)
         if page_token is None:
             break
+    #reset filename to correct one held from loop
+    fileName = fileNameHold
+
 except:
     data = '{"text":"<!channel> Alexa Automation failed to locate file number %i in Google Drive."}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
-    sendMail('Alexa Automation Failed', 'Alexa Automation failed to locate the next file (%i) in Google Drive. Please remediate as soon as possilbe') % (nextNumber)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to locate the next file (%i) in Google Drive. Please remediate as soon as possilbe: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber))
     quit()
-#reset filename to correct one held from loop
-fileName = fileNameHold
 
 if not(readAhead):
     data = '{"text":"Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing."}' % (nextNumber+1)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
-    sendMail('Alexa Automation Warning', 'Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing.') % (nextNumber+1)
+    sendMail('Alexa Automation Warning', 'Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing. Please ensure the file has been uploaded to Google Drive to avoid failure tomorrow: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber+1))
 
 # Download the file
 try:
@@ -151,7 +157,7 @@ try:
 except:
     data = '{"text":"<!channel> Alexa Automation failed to download file number %i from Google Drive."}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
-    sendMail('Alexa Automation Failed', 'Alexa Automation failed to download file number %i from Google Drive') % (nextNumber)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to download file number %i from Google Drive' % (nextNumber))
     quit()
 
 # Convert the File from m4a to mp3
@@ -164,7 +170,7 @@ try:
 except:
     data = '{"text":"<!channel> Alexa Automation failed to transcode file number %i"}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
-    sendMail('Alexa Automation Failed', 'Alexa Automation failed to transcode file number %i') % (nextNumber)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to transcode file number %i' % (nextNumber))
     quit()
 
 # Remove the old version
