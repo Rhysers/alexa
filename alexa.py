@@ -1,14 +1,45 @@
 #!/usr/bin/env python3
-import os, re, sys, datetime, io, subprocess, requests, glob, time
+import os, re, sys, datetime, io, subprocess, requests, glob, time, smtplib
 from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 from apiclient.http import MediaIoBaseDownload
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
-debugging=True
+debugging=False
 
 #values for any error handling:
 headers = {'Content-type': 'application/json',}
+
+#Define Email Function:
+def sendMail(subject, body):
+    try:
+        server=smtplib.SMTP('smtp.gmail.com', 587)
+        server.ehlo()
+        server.starttls()
+    except:
+        print('Failed to instantiate the mail server.')
+    sent_from = 'piratemonkscal@gmail.com'
+    addresses = ['rhys.j.ferris@gmail.com', 'tmoucka@gmail.com', 'treyshaver@gmail.com']
+    for address in addresses:
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = "Alexa Automator"
+            msg['To'] = address
+            msg['Subject'] = subject
+            msg.attach(MIMEText(body, 'plain'))
+            text = msg.as_string()
+        except:
+            print('Issues building the message.')
+        try:
+            gmail_user = 'piratemonkscal@gmail.com'
+            gmail_password = 'SamsonSociety2019'
+            server.login(gmail_user, gmail_password)
+            server.sendmail(sent_from, address, text)
+        except:
+            print('Failed to send the message.')
+    server.close()
 
 # Set Base Directory for easy changing for migration to rPi
 # Get the Base Directory from file
@@ -16,7 +47,6 @@ try:
     f=open("/alexaBaseDirectory.txt", "r")
     if f.mode == 'r':
         baseDirectory=f.read().strip()
-#        baseDirectory=baseDirectory.strip()
         f.close()
         if debugging:
             print("Base Directory is "+baseDirectory)
@@ -24,6 +54,7 @@ except:
     f.close()
     data = '{"text":"<!channel> Alexa Automation failed to get the working directory"}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to get the current working directory')
     quit()
 
 # Change directory here
@@ -41,6 +72,7 @@ except:
     f.close()
     data = '{"text":"<!channel> Alexa Automation failed to open file to get current number"}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to get the current number from file')
     quit()
 if debugging:
     print("Current Number="+str(currentNumber))
@@ -59,6 +91,7 @@ try:
 except:
     data = '{"text":"<!channel> Alexa Automation failed to authenticate to Google Drive. Rerun script with --noauth_local_webserver to re-establish authentication."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to authenticate to Google Drive. Rerun script with --noauth_local_webserver to re-establish authentication. Rhys probably needs to fix this one, best to make sure he got htis message.')
     quit()
 
 # Call the API
@@ -88,16 +121,19 @@ try:
         page_token = results.get('nextPageToken', None)
         if page_token is None:
             break
+    #reset filename to correct one held from loop
+    fileName = fileNameHold
+
 except:
     data = '{"text":"<!channel> Alexa Automation failed to locate file number %i in Google Drive."}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to locate the next file (%i) in Google Drive. Please remediate as soon as possilbe: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber))
     quit()
-#reset filename to correct one held from loop
-fileName = fileNameHold
 
 if not(readAhead):
     data = '{"text":"Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing."}' % (nextNumber+1)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Warning', 'Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing. Please ensure the file has been uploaded to Google Drive to avoid failure tomorrow: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber+1))
 
 # Download the file
 try:
@@ -114,6 +150,7 @@ try:
 except:
     data = '{"text":"<!channel> Alexa Automation failed to download file number %i from Google Drive."}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to download file number %i from Google Drive' % (nextNumber))
     quit()
 
 # Convert the File from m4a to mp3
@@ -124,11 +161,12 @@ try:
         print("Filename after conversion: "+newFileName)
     subprocess.run(['ffmpeg', '-i', fileName, "-filter:a", "volume=10dB", newFileName])
 except:
-    data = '{"text":"<!channel> Alexa Automation failed to transcode file number %i to MP3."}' % (nextNumber)
+    data = '{"text":"<!channel> Alexa Automation failed to transcode file number %i"}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to transcode file number %i' % (nextNumber))
     quit()
 
-# Remove the .m4a version
+# Remove the old version
 time.sleep(3) #ensure ffmpeg is done with the file
 try:
     if debugging:
@@ -142,6 +180,7 @@ try:
 except:
     data = '{"text":"Alexa Automation experienced a non-fatal error while cleaning up files. Eventually the device will run out of space if not resolved."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Warning', 'Alexa Automation experienced a non-fatal error while cleaning up files. Eventually the device will run out of space if not resolved.')
 
 # Get info about the file
 try:
@@ -155,6 +194,7 @@ try:
 except:
     data = '{"text":"<!channel> Alexa Automation failed while getting info about the file to put in the XML."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed while getting info about the file in order to build the XML')
     quit()
 
 # Update the RSS XML
@@ -184,6 +224,7 @@ except:
     f.close()
     data = '{"text":"<!channel> Alexa Automation failed while reading from the RSS XML."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed while reading from the RSS XML')
     quit()
 
 # Write the new current number to file
@@ -195,4 +236,5 @@ except:
     f.close()
     data = '{"text":"<!channel> Alexa Automation failed while writing the updated XML to file."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed while writing the update XML to file')
     quit()
