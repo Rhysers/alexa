@@ -7,8 +7,6 @@ from apiclient.http import MediaIoBaseDownload
 #mime stuff
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
 
 debugging=True
 
@@ -26,9 +24,6 @@ def sendMail(subject, body):
     try:
         sent_from = 'piratemonkscal@gmail.com'
         to = ['rhys.j.ferris@gmail.com', 'mooreknowledge@gmail.com']
-#        subject = sys.argv[2]
-#        body = sys.argv[3]
-
         msg = MIMEMultipart()
         msg['From'] = 'piratemonkscal@gmail.com'
         msg['To'] = ", ".join(to)
@@ -43,7 +38,6 @@ def sendMail(subject, body):
         server.login(gmail_user, gmail_password)
         server.sendmail(sent_from, ", ".join(to), text)
         server.close()
-        print ("Message sent")
     except:
         print('Failed to send the message.')
 
