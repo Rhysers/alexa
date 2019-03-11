@@ -8,7 +8,7 @@ from apiclient.http import MediaIoBaseDownload
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-debugging=True
+debugging=False
 
 #values for any error handling:
 headers = {'Content-type': 'application/json',}
@@ -22,11 +22,11 @@ def sendMail(subject, body):
     except:
         print('Failed to instantiate the mail server.')
     sent_from = 'piratemonkscal@gmail.com'
-    addresses = ['rhys.j.ferris@gmail.com', 'rhysers@gmail.com']
-    for ( address in addresses )
+    addresses = ['rhys.j.ferris@gmail.com', 'tmoucka@gmail.com', 'treyshaver@gmail.com']
+    for address in addresses:
         try:
             msg = MIMEMultipart()
-            msg['From'] = sent_from
+            msg['From'] = "Alexa Automator"
             msg['To'] = address
             msg['Subject'] = subject
             msg.attach(MIMEText(body, 'plain'))
@@ -37,16 +37,13 @@ def sendMail(subject, body):
             gmail_user = 'piratemonkscal@gmail.com'
             gmail_password = 'SamsonSociety2019'
             server.login(gmail_user, gmail_password)
-            server.sendmail(sent_from, ", ".join(to), text)
-            server.close()
+            server.sendmail(sent_from, address, text)
         except:
             print('Failed to send the message.')
+    server.close()
 
 # Set Base Directory for easy changing for migration to rPi
 # Get the Base Directory from file
-
-sendMail("Antoher Test", "Yet Another Test")
-
 try:
     f=open("/alexaBaseDirectory.txt", "r")
     if f.mode == 'r':
