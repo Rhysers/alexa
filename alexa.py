@@ -21,28 +21,31 @@ def sendMail(subject, body):
         server.starttls()
     except:
         print('Failed to instantiate the mail server.')
-    try:
-        sent_from = 'piratemonkscal@gmail.com'
-        to = ['rhys.j.ferris@gmail.com', 'mooreknowledge@gmail.com']
-        msg = MIMEMultipart()
-        msg['From'] = 'piratemonkscal@gmail.com'
-        msg['To'] = ", ".join(to)
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
-        text = msg.as_string()
-    except:
-        print('Issues building the message.')
-    try:
-        gmail_user = 'piratemonkscal@gmail.com'
-        gmail_password = 'SamsonSociety2019'
-        server.login(gmail_user, gmail_password)
-        server.sendmail(sent_from, ", ".join(to), text)
-        server.close()
-    except:
-        print('Failed to send the message.')
+    sent_from = 'piratemonkscal@gmail.com'
+    addresses = ['rhys.j.ferris@gmail.com', 'rhysers@gmail.com']
+    for ( address in addresses )
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = sent_from
+            msg['To'] = address
+            msg['Subject'] = subject
+            msg.attach(MIMEText(body, 'plain'))
+            text = msg.as_string()
+        except:
+            print('Issues building the message.')
+        try:
+            gmail_user = 'piratemonkscal@gmail.com'
+            gmail_password = 'SamsonSociety2019'
+            server.login(gmail_user, gmail_password)
+            server.sendmail(sent_from, ", ".join(to), text)
+            server.close()
+        except:
+            print('Failed to send the message.')
 
 # Set Base Directory for easy changing for migration to rPi
 # Get the Base Directory from file
+
+sendMail("Antoher Test", "Yet Another Test")
 
 try:
     f=open("/alexaBaseDirectory.txt", "r")
