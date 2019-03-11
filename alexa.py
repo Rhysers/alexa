@@ -4,7 +4,6 @@ from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 from apiclient.http import MediaIoBaseDownload
-#mime stuff
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
