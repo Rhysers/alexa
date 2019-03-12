@@ -18,6 +18,9 @@ def sendMail(subject, body):
     addresses = ['rhys.j.ferris@gmail.com']
     for address in addresses:
         try:
+            if debugging:
+                print(subject)
+                print(body)
             msg = MIMEMultipart()
             msg['From'] = "Alexa Automator"
             msg['To'] = address
@@ -132,5 +135,6 @@ try:
 except:
     data = '{"text":"<!channel> Alexa Automation Read Ahead still failed to locate file number %i in Google Drive. Please remediate as soon as possible otherwise automation will fail tonight."}' % (nextNumber)
     #response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    print("Trying to send the message")
     sendMail('Alexa Automation Read Ahead Warning', 'Alexa Automation Read Ahead still failed to locate file number %i in Google Drive. Please remediate as soon as possible otherwise automation will fail tonight: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber))
     quit()
