@@ -39,6 +39,9 @@ def sendMail(subject, body):
         except:
             print('Failed to send the message.')
     server.close()
+    
+#values for any error handling:
+headers = {'Content-type': 'application/json',}
 
 #Get Base Directory
 try:
