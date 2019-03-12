@@ -134,6 +134,19 @@ if not(readAhead):
     data = '{"text":"Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing."}' % (nextNumber+1)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Warning', 'Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing. Please ensure the file has been uploaded to Google Drive to avoid failure tomorrow: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber+1))
+    try: # Write value to file for readahead script
+        f= open(baseDirectory+"readAhead.txt", "w+")
+        f.write("True")
+        f.close()
+    except:
+        f.close()
+else:   # No need to run readahead script
+    try:
+        f= open(baseDirectory+"readAhead.txt", "w+")
+        f.write("False")
+        f.close()
+    except:
+        f.close()
 
 # Download the file
 try:
