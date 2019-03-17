@@ -13,24 +13,13 @@ debugging=False
 HOST = '127.0.0.5'
 PORT = 65432
 #Functions for statusboardd
-def alexaGood():
+def sendStatus(status):
+    theStatus = status.encode()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socks:
         socks.connect((HOST, PORT))
-        socks.sendall(b'alexaGood()')
+        socks.sendall(theStatus)
         if debugging:
-            print('Sent alexaGood()')
-def alexaWarning():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socks:
-        socks.connect((HOST, PORT))
-        socks.sendall(b'alexaWarning()')
-        if debugging:
-            print('Sent alexaWarning()')
-def alexaBad():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socks:
-        socks.connect((HOST, PORT))
-        socks.sendall(b'alexaBad()')
-        if debugging:
-            print('Sent alexaBad()')
+            print('Sent '+status)
 
 #values for any error handling:
 headers = {'Content-type': 'application/json',}
@@ -78,7 +67,7 @@ except:
     data = '{"text":"<!channel> Alexa Automation failed to get the working directory"}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Failed', 'Alexa Automation failed to get the current working directory')
-    alexaBad()
+    sendStatus("alexaBad()")
     quit()
 
 # Change directory here
@@ -97,7 +86,7 @@ except:
     data = '{"text":"<!channel> Alexa Automation failed to open file to get current number"}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Failed', 'Alexa Automation failed to get the current number from file')
-    alexaBad()
+    sendStatus("alexaBad()")
     quit()
 if debugging:
     print("Current Number="+str(currentNumber))
@@ -117,7 +106,7 @@ except:
     data = '{"text":"<!channel> Alexa Automation failed to authenticate to Google Drive. Rerun script with --noauth_local_webserver to re-establish authentication."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Failed', 'Alexa Automation failed to authenticate to Google Drive. Rerun script with --noauth_local_webserver to re-establish authentication. Rhys probably needs to fix this one, best to make sure he got htis message.')
-    alexaBad()
+    sendStatus("alexaBad()")
     quit()
 
 # Call the API
@@ -154,14 +143,14 @@ except:
     data = '{"text":"<!channel> Alexa Automation failed to locate file number %i in Google Drive."}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Failed', 'Alexa Automation failed to locate the next file (%i) in Google Drive. Please remediate as soon as possilbe: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber))
-    alexaBad()
+    sendStatus("alexaBad()")
     quit()
 
 if not(readAhead):
     data = '{"text":"Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing."}' % (nextNumber+1)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Warning', 'Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing. Please ensure the file has been uploaded to Google Drive to avoid failure tomorrow: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber+1))
-    alexaWarning()
+    sendStatus("alexaWarning()")
     try: # Write value to file for readahead script
         f= open(baseDirectory+"readAhead.txt", "w+")
         f.write("True")
@@ -192,7 +181,7 @@ except:
     data = '{"text":"<!channel> Alexa Automation failed to download file number %i from Google Drive."}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Failed', 'Alexa Automation failed to download file number %i from Google Drive' % (nextNumber))
-    alexaBad()
+    sendStatus("alexaBad()")
     quit()
 
 # Convert the File from m4a to mp3
@@ -206,7 +195,7 @@ except:
     data = '{"text":"<!channel> Alexa Automation failed to transcode file number %i"}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Failed', 'Alexa Automation failed to transcode file number %i' % (nextNumber))
-    alexaBad()
+    sendStatus("alexaBad()")
     quit()
 
 # Remove the old version
@@ -224,7 +213,7 @@ except:
     data = '{"text":"Alexa Automation experienced a non-fatal error while cleaning up files. Eventually the device will run out of space if not resolved."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Warning', 'Alexa Automation experienced a non-fatal error while cleaning up files. Eventually the device will run out of space if not resolved.')
-    alexaWarning()
+    sendStatus("alexaWarning()")
 
 # Get info about the file
 try:
@@ -239,7 +228,7 @@ except:
     data = '{"text":"<!channel> Alexa Automation failed while getting info about the file to put in the XML."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Failed', 'Alexa Automation failed while getting info about the file in order to build the XML')
-    alexaBad()
+    sendStatus("alexaBad()")
     quit()
 
 # Update the RSS XML
@@ -270,7 +259,7 @@ except:
     data = '{"text":"<!channel> Alexa Automation failed while reading from the RSS XML."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Failed', 'Alexa Automation failed while reading from the RSS XML')
-    alexaBad()
+    sendStatus("alexaBad()")
     quit()
 
 # Write the new current number to file
@@ -278,10 +267,11 @@ try:
     f= open(baseDirectory+"curNum.txt", "w+")
     f.write(str(nextNumber))
     f.close()
+    sendStatus("alexaGood()")
 except:
     f.close()
     data = '{"text":"<!channel> Alexa Automation failed while writing the updated XML to file."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
     sendMail('Alexa Automation Failed', 'Alexa Automation failed while writing the update XML to file')
-    alexaBad()
+    sendStatus("alexaBad()")
     quit()
