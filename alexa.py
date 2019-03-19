@@ -184,7 +184,7 @@ except:
     sendStatus("alexaBad()")
     quit()
 
-# Convert the File from m4a to mp3
+# Increase the Volume
 try:
     newFileName = fileName.replace(" ", "_")
 #    newFileName = newFileName.replace(".m4a", ".mp3")
@@ -244,7 +244,7 @@ try:
         fileTitle = "Samson House Devotional"
     for i in range(len(lines)):
         if lines[i].startswith('    <enclosure url'):
-            lines[i] = "    <enclosure url=\"https://odinforce.net/"+newFileName+"\" length=\""+str(fileSize)+"\" type=\"audio/mpeg\" />\n"
+            lines[i] = "    <enclosure url=\"https://samson.odinforce.net/"+newFileName+"\" length=\""+str(fileSize)+"\" type=\"audio/mpeg\" />\n"
         elif lines[i].startswith('    <title>'):
             lines[i] = "    <title>"+fileTitle+"</title>\n"
         elif lines[i].startswith('    <itunes:title>'):
