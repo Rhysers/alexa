@@ -186,7 +186,7 @@ except:
     sendStatus("alexaBad()")
     quit()
 
-# Increase the Volume
+# Increase the Volume and make ogg version
 try:
     newFileName = fileName.replace(" ", "_")
 #    newFileName = newFileName.replace(".m4a", ".mp3")
@@ -199,9 +199,19 @@ except:
     sendMail('Alexa Automation Failed', 'Alexa Automation failed to transcode file number %i' % (nextNumber))
     sendStatus("alexaBad()")
     quit()
+try:
+    os.remove(baseDirectory+'dailyTime.ogg') #Remove the old one
+    subprocess.run(['ffmpeg', '-i', newFileName, 'dailyTime.ogg']) #Make the new one
+    os.remove(baseDirectory+'dailyTime.m4a')
+    os.symlink(baseDirectory+newFileName,baseDirectory+'dailyTime.m4a')
+except:
+    data = '{"text":"Warning: Alexa Automation failed to transcode file number %i to ogg. Web version will not work on some browsers"}' % (nextNumber)
+    response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to transcode file number %i to ogg. Web version will not work on some browsers' % (nextNumber))
+    sendStatus("alexaWarning()")
+    alexaWarningSent=True
 
 # Remove the old version
-time.sleep(3) #ensure ffmpeg is done with the file
 try:
     if debugging:
         print("Removing "+baseDirectory+fileName)
