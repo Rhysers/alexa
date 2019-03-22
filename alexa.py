@@ -34,7 +34,7 @@ def sendMail(subject, body):
     except:
         print('Failed to instantiate the mail server.')
     sent_from = 'piratemonkscal@gmail.com'
-    addresses = ['rhys.j.ferris@gmail.com', 'tmoucka@gmail.com', 'treyshaver@gmail.com']
+    addresses = ['rhys.j.ferris@gmail.com', 'tmoucka@gmail.com']
     for address in addresses:
         try:
             msg = MIMEMultipart()
