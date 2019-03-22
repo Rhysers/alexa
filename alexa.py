@@ -143,7 +143,7 @@ try:
 except:
     data = '{"text":"<!channel> Alexa Automation failed to locate file number %i in Google Drive."}' % (nextNumber)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
-    sendMail('Alexa Automation Failed', 'Alexa Automation failed to locate the next file (%i) in Google Drive. Please remediate as soon as possilbe: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber))
+    sendMail('Alexa Automation Failed', 'Alexa Automation has FAILED becuase it could not locate the next file (%i) in Google Drive. This can be remeidated in 2 steps: (1) upload the missing file to https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing and then (2) visit https://samson.odinforce.net/alexa.html and click the button to trigger the scritp to run.' % (nextNumber))
     sendStatus("alexaBad()")
     quit()
 
