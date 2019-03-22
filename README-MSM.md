@@ -9,9 +9,9 @@ additional details.)
 ### Step 1
 Tom Mouka records the audio file for the daily devotion and saves it with a numeric sequence file name.
 ### Step 2
-Tom Mouka uploads the recorded audio file into the Samson House Google Drive account (piratemonkscal@gmail.com - see password spreadsheet for credentials) into the _______ folder
+Tom Mouka uploads the recorded audio file into the Samson House Google Drive account (piratemonkscal@gmail.com - see password spreadsheet for credentials) into the Alexa Files folder
 ### Step 3
-An automated script runs every morning at 01:00a ET which processes the next numerically sequenced audio file and moves it into a publication folder where Alexa can retrieve it via API.
+An automated script runs every morning at 00:05a ET which processes the next numerically sequenced audio file and moves it into a publication folder where Alexa can retrieve it via API.
 ### Step 4
 Alexa pulls the audio file via API on-demand as needed to play the skill
 
@@ -23,10 +23,12 @@ Requires a credentials.json file in the working folder.
  
 ### Script Process
 Downloads the days file from Google Drive (folder??) 
-Converts it to MP3 format
-Renames it to __________
-Posts it in a directory (which directory??) to be hosted by a webserver 
-Also creates the xml for Alexa to identify the stream. 
+Uses FFMPEG to increase the volume by 10dB
+Renames it to change all spaces into underscores
+Posts it in the alexa directory to be hosted by a webserver 
+Also creates the xml for Alexa to identify the stream.
+Uses FFMPEG again to convert the boosted file to ogg for the webpage hosted audio file
+Creates a symlink to the m4a version that is used by the webpage hosted audio files
 
 ## Setup
 1. Run the script the first time with --noauth_local_webserver to authenticate with the
@@ -43,7 +45,7 @@ after midnight, but it should work either way.
 send a reminder if the next days file isn't uploaded to Google Drive.
 
 ## Troubleshooting & FAQ
-- If  the Alexa script does not find the file needed for the day after tomorrow, then an Alert message is posted into the automation channel in the Samson House slack workspace.
-- If the Alexa script does not find the file needed for tomorrow, then a Warning message is posted into the automation channel in the Samson House slack workspace and a notification e-mail is sent to Trey Shaver and Tom Mouka
-  - Contained in that warning e-mail is a link to the Google folder to upload the next audio file
-- If the next audio file is uploaded after 1a ET on the day of publication, then Alex will continue to play the previous day's audio file until the new file is processed and moved into the publication folder.  An on-demand link is available to trigger the Alexa processing script after the file is uploaded.
+- If  the Alexa script does not find the file needed for the day after tomorrow, then an Alert message is posted into the automation channel in the Samson House slack workspace and an email is sent to Rhys and Tom Mouka.
+- If the Alexa script does not find the file needed for tomorrow, then a Warning message is posted into the automation channel in the Samson House slack workspace and a notification e-mail is sent to Rhys and Tom Mouka
+  - Contained in that warning e-mail is a link to the Google folder to upload the next audio file and a link to a button that will manually trigger the script
+- If the next audio file is uploaded after 00:05 ET on the day of publication, then Alex will continue to play the previous day's audio file until the new file is processed and moved into the publication folder.  An on-demand link is available to trigger the Alexa processing script after the file is uploaded.
