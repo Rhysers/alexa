@@ -150,7 +150,7 @@ except:
 if not(readAhead):
     data = '{"text":"Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing."}' % (nextNumber+1)
 #    response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
-    sendMail('Alexa Automation Warning', 'Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing. Please ensure the file has been uploaded to Google Drive to avoid failure tomorrow: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber+1))
+#    sendMail('Alexa Automation Warning', 'Warning: Alexa Automation sucessfully found tomorrows file, but noticed that the next one after that (%i) is missing. Please ensure the file has been uploaded to Google Drive to avoid failure tomorrow: https://drive.google.com/drive/folders/1-oQx6HcsMmvEGdmnNW304JIQY9wxL1UF?usp=sharing' % (nextNumber+1))
     sendStatus("alexaWarning()")
     alexaWarningSent=True
     try: # Write value to file for readahead script
@@ -220,7 +220,7 @@ try:
     for filename in glob.glob(baseDirectory+str(currentNumber)+"*"):
         if debugging:
             print("Removing "+filename)
-        os.remove(filename)
+#        os.remove(filename)
 except:
     data = '{"text":"Alexa Automation experienced a non-fatal error while cleaning up files. Eventually the device will run out of space if not resolved."}'
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
