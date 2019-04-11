@@ -25,36 +25,6 @@ def sendStatus(status):
 headers = {'Content-type': 'application/json',}
 alexaWarningSent=False
 
-#Define Email Function:
-def sendMail(subject, body):
-    try:
-        server=smtplib.SMTP('smtp.gmail.com', 587)
-        server.ehlo()
-        server.starttls()
-    except:
-        print('Failed to instantiate the mail server.')
-    sent_from = 'piratemonkscal@gmail.com'
-    addresses = ['rhys.j.ferris@gmail.com', 'tmoucka@gmail.com']
-    for address in addresses:
-        try:
-            msg = MIMEMultipart()
-            msg['From'] = "Alexa Automator"
-            msg['To'] = address
-            msg['Subject'] = subject
-            msg.attach(MIMEText(body, 'plain'))
-            text = msg.as_string()
-        except:
-            print('Issues building the message.')
-        try:
-            gmail_user = 'piratemonkscal@gmail.com'
-            gmail_password = 'SamsonSociety2019'
-            server.login(gmail_user, gmail_password)
-            server.sendmail(sent_from, address, text)
-        except:
-            print('Failed to send the message.')
-    server.close()
-
-# Set Base Directory for easy changing for migration to rPi
 # Get the Base Directory from file
 try:
     f=open("/alexaBaseDirectory.txt", "r")
@@ -70,6 +40,47 @@ except:
     sendMail('Alexa Automation Failed', 'Alexa Automation failed to get the current working directory')
     sendStatus("alexaBad()")
     quit()
+
+#Get creds from file for email:
+try:
+    f=open(baseDirectory+"emailCreds.txt", "r")
+    if f.mode == 'r':
+        credArray=f.readlines()
+        f.close()
+except:
+    f.close()
+    data = '{"text":"<!channel> Alexa Automation failed to get the working directory"}'
+    response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed to get the current working directory')
+    sendStatus("alexaBad()")
+    quit()
+
+#Define Email Function:
+def sendMail(subject, body):
+    try:
+        server=smtplib.SMTP('smtp.gmail.com', 587)
+        server.ehlo()
+        server.starttls()
+    except:
+        print('Failed to instantiate the mail server.')
+    sent_from = credArray[0]
+    addresses = ['rhys.j.ferris@gmail.com', 'tmoucka@gmail.com']
+    for address in addresses:
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = "Alexa Automator"
+            msg['To'] = address
+            msg['Subject'] = subject
+            msg.attach(MIMEText(body, 'plain'))
+            text = msg.as_string()
+        except:
+            print('Issues building the message.')
+        try:
+            server.login(credArray[0], credArray[1])
+            server.sendmail(sent_from, address, text)
+        except:
+            print('Failed to send the message.')
+    server.close()
 
 # Change directory here
 os.chdir(baseDirectory)
@@ -274,6 +285,8 @@ except:
     sendMail('Alexa Automation Failed', 'Alexa Automation failed while reading from the RSS XML')
     sendStatus("alexaBad()")
     quit()
+
+subprocess.run(['/etc/alexa/newEpisode.sh', fileName]) #update podcast xml
 
 # Write the new current number to file
 try:
