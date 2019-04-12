@@ -3,3 +3,5 @@
 *.txt
 *.ogg
 rssfeed.xml
+newEpisode.sh
+podcastFeed.xml
