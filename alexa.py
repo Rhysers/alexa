@@ -228,9 +228,9 @@ try:
         print("Removing "+baseDirectory+fileName)
     os.remove(baseDirectory+fileName)
     # Remove old files currentNumber (STR)
-    for filename in glob.glob(baseDirectory+str(currentNumber)+"*"):
-        if debugging:
-            print("Removing "+filename)
+#    for filename in glob.glob(baseDirectory+str(currentNumber)+"*"):
+#        if debugging:
+#            print("Removing "+filename)
 #        os.remove(filename)
 except:
     data = '{"text":"Alexa Automation experienced a non-fatal error while cleaning up files. Eventually the device will run out of space if not resolved."}'
@@ -295,10 +295,10 @@ try:
     f.close()
     if not(alexaWarningSent):
         sendStatus("alexaGood()")
-except:
+except Exception as e:
     f.close()
-    data = '{"text":"<!channel> Alexa Automation failed while writing the updated XML to file."}'
+    data = '{"text":"<!channel> Alexa Automation failed while writing the updated XML to file. Exception: %s"}' % (e)
     response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=data)
-    sendMail('Alexa Automation Failed', 'Alexa Automation failed while writing the update XML to file')
+    sendMail('Alexa Automation Failed', 'Alexa Automation failed while writing the update XML to file. Exception: %s') % (e)
     sendStatus("alexaBad()")
     quit()
