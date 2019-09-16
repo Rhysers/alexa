@@ -209,7 +209,7 @@ try:
 #    newFileName = newFileName.replace(".m4a", ".mp3")
     if debugging:
         print("Filename after conversion: "+newFileName)
-    subprocess.run(['ffmpeg', '-i', fileName, "-filter:a", "volume=10dB", newFileName])
+    subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-nostats', '-i', fileName, "-filter:a", "volume=10dB", newFileName])
 except:
     data = '{"text":"<!channel> Alexa Automation failed to transcode file number %i"}' % (nextNumber)
     response = requests.post(slackapikey, headers=headers, data=data)
@@ -218,7 +218,7 @@ except:
     quit()
 try:
     os.remove(baseDirectory+'dailyTime.ogg') #Remove the old one
-    subprocess.run(['ffmpeg', '-i', newFileName, 'dailyTime.ogg']) #Make the new one
+    subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-nostats', '-i', newFileName, 'dailyTime.ogg']) #Make the new one
     os.remove(baseDirectory+'dailyTime.m4a')
     os.symlink(baseDirectory+newFileName,baseDirectory+'dailyTime.m4a')
 except:
@@ -303,8 +303,12 @@ try:
         sendStatus("alexaGood()")
 except Exception as e:
     f.close()
+    s = str(e)
+    if "Connection refused" in s:
+        os.system("sudo shutdown --reboot 15")
+        quit()
     data = '{"text":"<!channel> Alexa Automation failed while writing the updated XML to file. Exception: %s"}' % (e)
     response = requests.post(slackapikey, headers=headers, data=data)
-    sendMail('Alexa Automation Failed', 'Alexa Automation failed while writing the update XML to file. Exception: %s') % (e)
+    sendMail('Alexa Automation Failed', "Alexa Automation failed while writing the update XML to file. Check Slack for more details on the exception.")
     sendStatus("alexaBad()")
     quit()
